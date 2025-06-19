@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HERO Belegscanner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-brand">
+                <div class="hero-logo">
+                    <span>H</span>
+                </div>
+                <span class="brand-text">HERO Belegscanner</span>
+            </div>
+            <nav class="header-nav">
+                <a href="#dashboard" class="nav-link active">Dashboard</a>
+                <a href="#belege" class="nav-link">Belege</a>
+                <a href="#euer" class="nav-link">EÜR</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Message Container -->
+    <div id="message-container" class="message-container hidden">
+        <div id="message-content" class="message-content">
+            <i id="message-icon" class="message-icon"></i>
+            <span id="message-text" class="message-text"></span>
+            <button id="message-close" class="message-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- KPI Cards -->
+        <div class="kpi-section">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <i class="fas fa-arrow-up kpi-icon kpi-icon-success"></i>
+                    <span class="kpi-label">Einnahmen</span>
+                </div>
+                <div class="kpi-value" id="income-value">0,00 €</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <i class="fas fa-arrow-down kpi-icon kpi-icon-error"></i>
+                    <span class="kpi-label">Ausgaben</span>
+                </div>
+                <div class="kpi-value" id="expenses-value">0,00 €</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <i class="fas fa-calculator kpi-icon kpi-icon-primary"></i>
+                    <span class="kpi-label">Gesamt</span>
+                </div>
+                <div class="kpi-value" id="total-value">0,00 €</div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Document Preview Section -->
+            <div class="preview-section">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-eye section-icon"></i>
+                            Dokumentvorschau
+                        </h2>
+                        <div class="preview-controls hidden" id="preview-controls">
+                            <button type="button" class="control-btn" id="rotate-left" title="Nach links drehen">
+                                <i class="fas fa-undo"></i>
+                            </button>
+                            <button type="button" class="control-btn" id="rotate-right" title="Nach rechts drehen">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                            <button type="button" class="control-btn" id="zoom-in" title="Vergrößern">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                            <button type="button" class="control-btn" id="zoom-out" title="Verkleinern">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button type="button" class="control-btn control-btn-danger" id="delete-doc" title="Dokument löschen">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Upload Area -->
+                    <div id="upload-area" class="upload-area">
+                        <div class="upload-content">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <h3 class="upload-title">Dokument hochladen</h3>
+                            <p class="upload-description">Dateien hier ablegen oder klicken zum Durchsuchen</p>
+                            <button type="button" class="btn btn-secondary" id="select-file">
+                                <i class="fas fa-folder-open"></i>
+                                Datei auswählen
+                            </button>
+                            <div class="upload-info">
+                                Unterstützt: JPG, PNG, PDF • Max. 10 MB
+                            </div>
+                        </div>
+                        <input type="file" id="file-input" accept="image/*,application/pdf" hidden>
+                    </div>
+
+                    <!-- Document Preview -->
+                    <div id="document-preview" class="document-preview hidden">
+                        <div class="preview-container">
+                            <img id="preview-image" class="preview-image" src="" alt="Dokumentvorschau">
+                            <div class="zoom-indicator" id="zoom-level">100%</div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div id="progress-container" class="progress-container hidden">
+                        <div class="progress-header">
+                            <span class="progress-label">Wird verarbeitet...</span>
+                            <span class="progress-percentage" id="progress-text">0%</span>
+                        </div>
+                        <div class="progress-bar-wrapper">
+                            <div class="progress-bar" id="progress-bar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Section -->
+            <div class="form-section">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-edit section-icon"></i>
+                            Belegdaten
+                        </h2>
+                    </div>
+
+                    <form id="receipt-form" class="receipt-form">
+                        <!-- Vendor Field -->
+                        <div class="form-group">
+                            <label for="vendor" class="form-label">
+                                Lieferant/Anbieter
+                                <span class="required-indicator">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="text" id="vendor" class="form-input" placeholder="Name des Lieferanten" required>
+                                <div class="confidence-bubble hidden" id="vendor-confidence">
+                                    <div class="confidence-dot"></div>
+                                </div>
+                            </div>
+                            <div class="field-error hidden" id="vendor-error">Bitte geben Sie den Lieferanten an</div>
+                        </div>
+
+                        <!-- Date Field -->
+                        <div class="form-group">
+                            <label for="date" class="form-label">
+                                Rechnungsdatum
+                                <span class="required-indicator">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="date" id="date" class="form-input" required>
+                                <div class="confidence-bubble hidden" id="date-confidence">
+                                    <div class="confidence-dot"></div>
+                                </div>
+                            </div>
+                            <div class="field-error hidden" id="date-error">Bitte geben Sie das Datum an</div>
+                        </div>
+
+                        <!-- Invoice Number Field -->
+                        <div class="form-group">
+                            <label for="invoice-number" class="form-label">Rechnungsnummer</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="invoice-number" class="form-input" placeholder="Rechnungsnummer">
+                                <div class="confidence-bubble hidden" id="invoice-number-confidence">
+                                    <div class="confidence-dot"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Document Type Field -->
+                        <div class="form-group">
+                            <label for="document-type" class="form-label">
+                                Dokumenttyp
+                                <span class="required-indicator">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <select id="document-type" class="form-input form-select" required>
+                                    <option value="">Bitte wählen...</option>
+                                    <option value="invoice">Rechnung</option>
+                                    <option value="receipt">Kassenbon</option>
+                                    <option value="credit-note">Gutschrift</option>
+                                    <option value="delivery-note">Lieferschein</option>
+                                    <option value="other">Sonstiges</option>
+                                </select>
+                                <div class="confidence-bubble hidden" id="document-type-confidence">
+                                    <div class="confidence-dot"></div>
+                                </div>
+                            </div>
+                            <div class="field-error hidden" id="document-type-error">Bitte wählen Sie einen Dokumenttyp</div>
+                        </div>
+
+                        <!-- Amount Fields Row -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="gross-amount" class="form-label">
+                                    Bruttobetrag
+                                    <span class="required-indicator">*</span>
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="gross-amount" class="form-input" step="0.01" placeholder="0,00" required>
+                                    <span class="input-suffix">€</span>
+                                    <div class="confidence-bubble hidden" id="gross-amount-confidence">
+                                        <div class="confidence-dot"></div>
+                                    </div>
+                                </div>
+                                <div class="field-error hidden" id="gross-amount-error">Bitte geben Sie den Betrag an</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="vat-rate" class="form-label">MwSt-Satz</label>
+                                <div class="input-wrapper">
+                                    <select id="vat-rate" class="form-input form-select">
+                                        <option value="0">0%</option>
+                                        <option value="7">7%</option>
+                                        <option value="19" selected>19%</option>
+                                        <option value="16">16%</option>
+                                        <option value="5">5%</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Net Amount Field -->
+                        <div class="form-group">
+                            <label for="net-amount" class="form-label">Nettobetrag</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="net-amount" class="form-input" step="0.01" placeholder="0,00" readonly>
+                                <span class="input-suffix">€</span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="finish-button">
+                                <i class="fas fa-check"></i>
+                                <span>Fertig stellen</span>
+                                <div class="btn-spinner hidden">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </div>
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="new-scan-btn">
+                                <i class="fas fa-plus"></i>
+                                <span>Neuer Scan</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html> 
+</html> 
