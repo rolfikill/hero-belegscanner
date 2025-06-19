@@ -1,0 +1,35 @@
+# Systemd Service für HERO Belegscanner
+# Datei: /etc/systemd/system/hero-belegscanner.service
+
+[Unit]
+Description=HERO Belegscanner - KI-gestützter Dokumentenscanner
+After=network.target
+
+[Service]
+Type=exec
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/hero-belegscanner
+Environment=PATH=/var/www/hero-belegscanner/document-scanner-env/bin
+Environment=ANTHROPIC_API_KEY=ihr_claude_api_key_hier
+ExecStart=/var/www/hero-belegscanner/document-scanner-env/bin/gunicorn --config /var/www/hero-belegscanner/deploy/gunicorn.conf.py main:app
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=5
+KillMode=mixed
+TimeoutStopSec=5
+
+# Security Settings
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/www/hero-belegscanner/uploads
+ReadWritePaths=/var/log/gunicorn
+
+# Resource Limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target 
