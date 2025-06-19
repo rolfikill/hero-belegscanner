@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  hero-belegscanner:
+    build: .
+    container_name: hero-belegscanner
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - FLASK_ENV=production
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    networks:
+      - hero-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: hero-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/sites:/etc/nginx/sites-available
+      - ./ssl:/etc/ssl/certs
+    depends_on:
+      - hero-belegscanner
+    networks:
+      - hero-network
+
+networks:
+  hero-network:
+    driver: bridge
+
+volumes:
+  uploads:
+  logs: 
